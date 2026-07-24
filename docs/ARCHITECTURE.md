@@ -248,3 +248,10 @@ new active revision.
 `EntityId`/`RevisionId` references. Snapshot reconstruction resolves those exact
 revisions and never depends on current state. Current-state indexes contain only
 active revisions and remain derived, rebuildable structures.
+
+## Goal Model (RFC-013)
+
+`knowledge_architect.kir.goal` defines immutable desired knowledge states.
+Goals use storage-independent Queries as success criteria and may be evaluated
+against current versioned state or a specific snapshot. Goals describe what is
+desired; they contain no planning, scheduling, tools or execution behavior.
