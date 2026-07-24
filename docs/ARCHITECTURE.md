@@ -99,3 +99,17 @@ SQLiteProjectionStore
 ```
 
 Projection snapshots are caches and may always be discarded and rebuilt from the event stream.
+
+## Immutable KIR Core
+
+RFC-005 introduces `knowledge_architect.kir` as the canonical semantic boundary. The Core contains typed identities, entities, knowledge units, explicit relations, evidence, provenance, and canonical serialization.
+
+```text
+Source observations / future extraction
+                ↓
+        immutable KIR Core
+                ↓
+future KIR event and projection adapters
+```
+
+The KIR package is domain-only. It does not import connectors, SQLite adapters, application handlers, or projections. Existing Core objects cannot be mutated or semantically redefined by future extensions.
