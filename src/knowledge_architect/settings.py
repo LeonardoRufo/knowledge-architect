@@ -13,7 +13,7 @@ class Settings:
     store_path: str
 
     @classmethod
-    def from_env(cls) -> "Settings":
+    def from_env(cls) -> Settings:
         load_dotenv()
         return cls(
             notion_token=os.getenv("NOTION_TOKEN", ""),

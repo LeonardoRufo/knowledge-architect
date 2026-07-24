@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -15,7 +15,7 @@ class KnowledgeEvent(BaseModel):
     source_system: str
     source_id: str
     logical_time: int = 0
-    occurred_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    occurred_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     causation_ids: list[str] = Field(default_factory=list)
     payload: dict[str, Any] = Field(default_factory=dict)
 

@@ -61,6 +61,7 @@ kaa export data/architecture.json
 ```text
 knowledge-architect/
 ├── src/knowledge_architect/
+│   ├── application/
 │   ├── core/
 │   ├── connectors/notion/
 │   ├── event_store/
@@ -68,6 +69,9 @@ knowledge-architect/
 │   └── cli.py
 ├── tests/
 ├── docs/
+│   ├── adr/
+│   ├── rfc/
+│   └── specification/
 ├── data/
 ├── .env.example
 └── pyproject.toml

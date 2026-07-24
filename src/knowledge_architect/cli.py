@@ -5,6 +5,7 @@ from pathlib import Path
 
 import typer
 
+from knowledge_architect.application import SyncSourceArtifactCommand, SyncSourceArtifactHandler
 from knowledge_architect.connectors.notion import NotionClient, NotionConnector
 from knowledge_architect.event_store import SQLiteEventStore
 from knowledge_architect.materializer import materialize
@@ -13,6 +14,8 @@ from knowledge_architect.settings import Settings
 app = typer.Typer(help="Knowledge Architect Agent")
 notion_app = typer.Typer(help="Conector read-only do Notion")
 app.add_typer(notion_app, name="notion")
+
+DEFAULT_EXPORT_OUTPUT = typer.Argument(Path("data/architecture.json"))
 
 
 @notion_app.command("status")
@@ -41,10 +44,22 @@ def notion_sync_page(page_id: str) -> None:
     settings = Settings.from_env()
     store = SQLiteEventStore(settings.store_path)
     with NotionClient(settings.notion_token, notion_version=settings.notion_version) as client:
-        connector = NotionConnector(client)
-        document = connector.fetch(page_id)
-        inserted = store.append([connector.to_event(document)])
-    typer.echo(json.dumps({"inserted": inserted, "title": document.title}, ensure_ascii=False))
+        handler = SyncSourceArtifactHandler(
+            connector=NotionConnector(client),
+            event_store=store,
+        )
+        result = handler.handle(SyncSourceArtifactCommand(source_id=page_id))
+    typer.echo(
+        json.dumps(
+            {
+                "inserted": result.inserted,
+                "source_system": result.source_system,
+                "source_id": result.source_id,
+                "title": result.title,
+            },
+            ensure_ascii=False,
+        )
+    )
 
 
 @app.command("status")
@@ -57,7 +72,7 @@ def status() -> None:
 
 
 @app.command("export")
-def export(output: Path = typer.Argument(Path("data/architecture.json"))) -> None:
+def export(output: Path = DEFAULT_EXPORT_OUTPUT) -> None:
     """Materializa e exporta o estado atual."""
     settings = Settings.from_env()
     store = SQLiteEventStore(settings.store_path)
