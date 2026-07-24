@@ -111,5 +111,5 @@ def test_provenance_normalizes_time_to_utc_and_rejects_naive_time() -> None:
             ProvenanceId.new(),
             ProvenanceKind.AUTHORED,
             "human",
-            datetime(2026, 7, 24),
+            datetime(2026, 7, 24),  # noqa: DTZ001
         )
