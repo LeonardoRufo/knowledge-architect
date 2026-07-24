@@ -44,9 +44,11 @@ def notion_sync_page(page_id: str) -> None:
     settings = Settings.from_env()
     store = SQLiteEventStore(settings.store_path)
     with NotionClient(settings.notion_token, notion_version=settings.notion_version) as client:
+        connector = NotionConnector(client)
         handler = SyncSourceArtifactHandler(
-            connector=NotionConnector(client),
+            source_provider=connector,
             event_store=store,
+            event_factory=connector.to_event,
         )
         result = handler.handle(SyncSourceArtifactCommand(source_id=page_id))
     typer.echo(
