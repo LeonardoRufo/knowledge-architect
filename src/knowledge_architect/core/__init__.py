@@ -7,6 +7,7 @@ from .observation import (
     observation_idempotency_key,
     observe_source_document,
 )
+from .stream import StoredEvent
 
 __all__ = [
     "SOURCE_DOCUMENT_OBSERVED",
@@ -14,6 +15,7 @@ __all__ = [
     "SourceDocument",
     "SourceObservation",
     "SourceObservationEventFactory",
+    "StoredEvent",
     "content_fingerprint",
     "normalize_markdown",
     "observation_idempotency_key",

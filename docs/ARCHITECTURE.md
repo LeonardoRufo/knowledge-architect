@@ -81,3 +81,21 @@ EventStore (deduplicate by idempotency_key)
 
 Connectors acquire and normalize source data. The observation factory owns
 fingerprinting and event creation, while the event store enforces idempotency.
+
+## Projection engine
+
+Materialized query state is derived by named, versioned projections. Each projection is a deterministic reducer over `StoredEvent` entries ordered by their persisted sequence. Snapshots record the projection version and the last stream sequence included in the rebuild.
+
+```text
+SQLiteEventStore.list_stream()
+          ↓
+ProjectionRegistry
+          ↓
+SourceDocumentProjection
+          ↓
+RebuildProjectionHandler
+          ↓
+SQLiteProjectionStore
+```
+
+Projection snapshots are caches and may always be discarded and rebuilt from the event stream.

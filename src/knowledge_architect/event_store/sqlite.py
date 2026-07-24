@@ -5,7 +5,7 @@ import sqlite3
 from collections.abc import Iterable
 from pathlib import Path
 
-from knowledge_architect.core import KnowledgeEvent
+from knowledge_architect.core import KnowledgeEvent, StoredEvent
 
 
 class SQLiteEventStore:
@@ -83,9 +83,26 @@ class SQLiteEventStore:
         return inserted
 
     def list_events(self) -> list[KnowledgeEvent]:
+        return [stored.event for stored in self.list_stream()]
+
+    def list_stream(self, *, after_sequence: int = 0) -> list[StoredEvent]:
         with self._connect() as connection:
-            rows = connection.execute("SELECT event_json FROM events ORDER BY sequence").fetchall()
-        return [KnowledgeEvent.model_validate(json.loads(row["event_json"])) for row in rows]
+            rows = connection.execute(
+                """
+                SELECT sequence, event_json
+                FROM events
+                WHERE sequence > ?
+                ORDER BY sequence
+                """,
+                (after_sequence,),
+            ).fetchall()
+        return [
+            StoredEvent(
+                sequence=int(row["sequence"]),
+                event=KnowledgeEvent.model_validate(json.loads(row["event_json"])),
+            )
+            for row in rows
+        ]
 
     def count(self) -> int:
         with self._connect() as connection:
