@@ -5,16 +5,25 @@ from pathlib import Path
 
 import typer
 
-from knowledge_architect.application import SyncSourceArtifactCommand, SyncSourceArtifactHandler
+from knowledge_architect.application import (
+    RebuildProjectionCommand,
+    RebuildProjectionHandler,
+    SyncSourceArtifactCommand,
+    SyncSourceArtifactHandler,
+)
 from knowledge_architect.connectors.notion import NotionClient, NotionConnector
 from knowledge_architect.core import SourceObservationEventFactory
 from knowledge_architect.event_store import SQLiteEventStore
 from knowledge_architect.materializer import materialize
+from knowledge_architect.projection_store import SQLiteProjectionStore
+from knowledge_architect.projections import ProjectionRegistry, SourceDocumentProjection
 from knowledge_architect.settings import Settings
 
 app = typer.Typer(help="Knowledge Architect Agent")
 notion_app = typer.Typer(help="Conector read-only do Notion")
 app.add_typer(notion_app, name="notion")
+projection_app = typer.Typer(help="Build and inspect materialized projections")
+app.add_typer(projection_app, name="projection")
 
 DEFAULT_EXPORT_OUTPUT = typer.Argument(Path("data/architecture.json"))
 
@@ -63,6 +72,41 @@ def notion_sync_page(page_id: str) -> None:
             ensure_ascii=False,
         )
     )
+
+
+@projection_app.command("rebuild")
+def projection_rebuild(name: str = "source_documents") -> None:
+    """Rebuild a named projection from the complete event stream."""
+    settings = Settings.from_env()
+    event_store = SQLiteEventStore(settings.store_path)
+    projection_store = SQLiteProjectionStore(settings.store_path)
+    registry = ProjectionRegistry([SourceDocumentProjection()])
+    result = RebuildProjectionHandler(
+        event_store=event_store,
+        projection_store=projection_store,
+        registry=registry,
+    ).handle(RebuildProjectionCommand(projection_name=name))
+    typer.echo(
+        json.dumps(
+            {
+                "projection": result.projection_name,
+                "version": result.projection_version,
+                "events_replayed": result.events_replayed,
+                "last_sequence": result.last_sequence,
+            },
+            ensure_ascii=False,
+        )
+    )
+
+
+@projection_app.command("show")
+def projection_show(name: str = "source_documents") -> None:
+    """Show the latest persisted snapshot for a named projection."""
+    settings = Settings.from_env()
+    snapshot = SQLiteProjectionStore(settings.store_path).load(name)
+    if snapshot is None:
+        raise typer.BadParameter(f"Projection {name!r} has not been built")
+    typer.echo(json.dumps(snapshot, ensure_ascii=False, indent=2))
 
 
 @app.command("status")
