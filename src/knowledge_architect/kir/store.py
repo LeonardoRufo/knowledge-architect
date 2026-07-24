@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import StrEnum
 from threading import RLock
-from typing import Any, Self, TypeAlias
+from typing import TYPE_CHECKING, Any, Self, TypeAlias
 
 from .identity import KIRIdentity
 from .query import (
@@ -33,6 +33,9 @@ from .query import (
 from .relation import Relation
 from .serialization import canonical_json, to_primitive
 from .transformation import KnowledgeUnitTransformation
+
+if TYPE_CHECKING:
+    from .index import IndexManager
 
 StoreEntity: TypeAlias = Any
 StoreEntry: TypeAlias = tuple[str, str | int | float | bool | None]
@@ -197,11 +200,12 @@ class KnowledgeStore(ABC):
 class InMemoryKnowledgeStore(KnowledgeStore):
     """Reference adapter retaining immutable KIR objects in process memory."""
 
-    def __init__(self) -> None:
+    def __init__(self, index_manager: IndexManager | None = None) -> None:
         self._entities: dict[KIRIdentity, StoreEntity] = {}
         self._canonical: dict[KIRIdentity, str] = {}
         self._lock = RLock()
         self._capabilities = StoreCapabilities(transactions=True, traversals=True)
+        self._index_manager = index_manager
 
     @property
     def capabilities(self) -> StoreCapabilities:
@@ -220,6 +224,8 @@ class InMemoryKnowledgeStore(KnowledgeStore):
                 raise DuplicateIdentityError(f"identity already exists: {identity}")
             self._entities[identity] = entity
             self._canonical[identity] = serialized
+            if self._index_manager is not None:
+                self._index_manager.entity_saved(entity)
         return StoreResult(
             entity=entity,
             metadata=(("conflict_policy", conflict_policy.value), ("operation", "save")),
@@ -251,6 +257,8 @@ class InMemoryKnowledgeStore(KnowledgeStore):
                 existed = identity in self._entities
                 self._entities[identity] = entity
                 self._canonical[identity] = serialized
+                if self._index_manager is not None:
+                    self._index_manager.entity_saved(entity)
                 results.append(
                     StoreResult(
                         entity=entity,
@@ -282,6 +290,8 @@ class InMemoryKnowledgeStore(KnowledgeStore):
             try:
                 entity = self._entities.pop(identity)
                 self._canonical.pop(identity)
+                if self._index_manager is not None:
+                    self._index_manager.entity_deleted(identity)
             except KeyError as exc:
                 raise EntityNotFoundError(f"identity not found: {identity}") from exc
         return StoreResult(
@@ -303,7 +313,19 @@ class InMemoryKnowledgeStore(KnowledgeStore):
             raise TypeError("query must be a Query")
         with self._lock:
             entities = dict(self._entities)
-        selected = _select_query_candidates(query, entities)
+        indexed_identities = (
+            self._index_manager.candidates(query)
+            if self._index_manager is not None
+            else None
+        )
+        if indexed_identities is None:
+            selected = _select_query_candidates(query, entities)
+        else:
+            selected = tuple(
+                entities[identity]
+                for identity in indexed_identities
+                if identity in entities
+            )
         filtered = tuple(
             entity
             for entity in selected
@@ -326,10 +348,19 @@ class InMemoryKnowledgeStore(KnowledgeStore):
             removed = len(self._entities)
             self._entities.clear()
             self._canonical.clear()
+            if self._index_manager is not None:
+                self._index_manager.clear()
         return StoreResult(
             metadata=(("operation", "clear"),),
             statistics=(("deleted", removed),),
         )
+
+    def attach_index_manager(self, index_manager: IndexManager) -> None:
+        """Attach and rebuild an optional derived-index coordinator."""
+
+        with self._lock:
+            self._index_manager = index_manager
+            index_manager.rebuild()
 
     def transaction(self) -> StoreTransaction:
         return _InMemoryTransaction(self)
@@ -374,6 +405,8 @@ class _InMemoryTransaction(StoreTransaction):
             except Exception as exc:
                 self._store._entities = entities_snapshot
                 self._store._canonical = canonical_snapshot
+                if self._store._index_manager is not None:
+                    self._store._index_manager.rebuild()
                 self._closed = True
                 raise TransactionError("transaction commit failed and was rolled back") from exc
         self._closed = True

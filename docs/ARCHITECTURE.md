@@ -216,3 +216,22 @@ identity, provenance, relations, evidence, and first-class transformations. The 
 adapter keeps deterministic identity order and evaluates RFC-009 queries without changing
 the query or stored entities. SQLite, PostgreSQL, graph stores, indexing, caching, and
 physical transaction optimization remain outside RFC-010.
+
+## Storage-independent index model (RFC-011)
+
+Indexes are disposable derived structures coordinated by `IndexManager`.
+`SearchIndex` does not own entities and never becomes a source of truth. The
+reference `InMemorySearchIndex` provides hash-based identity, kind, and
+namespace candidate lookup.
+
+An indexed query follows this sequence:
+
+1. the index optionally returns candidate identities;
+2. `KnowledgeStore` retrieves the authoritative entities;
+3. the complete RFC-009 predicate, ordering, projection, traversal, and
+   pagination semantics are applied by the Store;
+4. unsupported or invalid index paths use a deterministic full scan.
+
+Store mutations update attached indexes. If an index update fails, it is marked
+invalid and query execution continues through the Store. Rebuilds consume only
+`KnowledgeStore.list()`, preserving RFC-010 as the sole source of truth.

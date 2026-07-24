@@ -17,6 +17,14 @@ from .identity import (
     RelationId,
     TransformationId,
 )
+from .index import (
+    IndexCapabilities,
+    IndexManager,
+    IndexResult,
+    IndexStatistics,
+    InMemorySearchIndex,
+    SearchIndex,
+)
 from .knowledge_unit import KnowledgeUnit, KnowledgeUnitKind
 from .provenance import Provenance, ProvenanceKind
 from .query import (
@@ -114,6 +122,11 @@ __all__ = [
     "HasTransformation",
     "IdentityValidator",
     "InMemoryKnowledgeStore",
+    "InMemorySearchIndex",
+    "IndexCapabilities",
+    "IndexManager",
+    "IndexResult",
+    "IndexStatistics",
     "KIRIdentity",
     "KindIs",
     "KnowledgeStore",
@@ -147,6 +160,7 @@ __all__ = [
     "RelationTransformationOutcome",
     "RelationTransformationPolicy",
     "RelationValidator",
+    "SearchIndex",
     "SerializationError",
     "ShortestPath",
     "StoreCapabilities",
