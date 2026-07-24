@@ -235,3 +235,16 @@ An indexed query follows this sequence:
 Store mutations update attached indexes. If an index update fails, it is marked
 invalid and query execution continues through the Store. Rebuilds consume only
 `KnowledgeStore.list()`, preserving RFC-010 as the sole source of truth.
+
+## Versioning and snapshots (RFC-012)
+
+`knowledge_architect.kir.versioning` adds an optional historical layer over the
+persistence Port. Logical identity remains `EntityId`; each immutable state is
+identified by `RevisionId` and linked in a linear per-entity history. Writes use
+optimistic concurrency, deletion creates a tombstone, and restoration creates a
+new active revision.
+
+`KnowledgeSnapshot` captures an immutable, deterministically ordered set of
+`EntityId`/`RevisionId` references. Snapshot reconstruction resolves those exact
+revisions and never depends on current state. Current-state indexes contain only
+active revisions and remain derived, rebuildable structures.
