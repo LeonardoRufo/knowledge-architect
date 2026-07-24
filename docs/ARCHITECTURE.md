@@ -130,3 +130,21 @@ ExtensionDefinition
 ```
 
 The registry validates manifests but does not import or execute extension code. Reserved Core namespaces cannot be claimed by extensions.
+
+## First-class knowledge transformations
+
+RFC-007 represents semantic evolution without mutating the immutable KIR Core. Transformations record explicit source-to-target mappings, derivation provenance, and policy decisions for every relation they claim to handle.
+
+```text
+source KnowledgeUnits (preserved)
+              ↓
+KnowledgeUnitTransformation
+    ├── new transformation identity
+    ├── explicit semantic mappings
+    ├── derivation provenance
+    └── RelationTransformationPolicy
+              ↓
+new KnowledgeUnits / Relations
+```
+
+Merge and split shapes are validated, target identities must be new, and relation propagation is never implicit. A `TransformationResult` binds the transformation record to the exact immutable objects it created.

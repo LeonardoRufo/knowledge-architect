@@ -15,11 +15,21 @@ from .identity import (
     KnowledgeUnitId,
     ProvenanceId,
     RelationId,
+    TransformationId,
 )
 from .knowledge_unit import KnowledgeUnit, KnowledgeUnitKind
 from .provenance import Provenance, ProvenanceKind
 from .relation import Relation, RelationEndpoint, RelationTargetKind
 from .serialization import canonical_json, to_primitive
+from .transformation import (
+    KnowledgeUnitTransformation,
+    RelationTransformationDecision,
+    RelationTransformationOutcome,
+    RelationTransformationPolicy,
+    TransformationKind,
+    TransformationMapping,
+    TransformationResult,
+)
 
 __all__ = [
     "Entity",
@@ -37,6 +47,7 @@ __all__ = [
     "KnowledgeUnit",
     "KnowledgeUnitId",
     "KnowledgeUnitKind",
+    "KnowledgeUnitTransformation",
     "Provenance",
     "ProvenanceId",
     "ProvenanceKind",
@@ -44,6 +55,13 @@ __all__ = [
     "RelationEndpoint",
     "RelationId",
     "RelationTargetKind",
+    "RelationTransformationDecision",
+    "RelationTransformationOutcome",
+    "RelationTransformationPolicy",
+    "TransformationId",
+    "TransformationKind",
+    "TransformationMapping",
+    "TransformationResult",
     "canonical_json",
     "to_primitive",
 ]
