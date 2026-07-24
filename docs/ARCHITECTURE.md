@@ -191,3 +191,28 @@ Queries are immutable and canonically serializable. They describe intent only. C
 memory, SQL, graph, RDF, or future engines implement `QueryEngine` outside the Core and
 must preserve the semantics of every query component. Traversal algorithms, physical
 plans, indexing, caching, and persistence are intentionally outside RFC-009.
+
+## Persistent KIR store Port
+
+RFC-010 introduces persistence as a Port while preserving the immutable Core and the
+storage-independent query language.
+
+```text
+Application / future services
+             ↓
+      KnowledgeStore Port
+       ├── canonical serialization
+       ├── explicit conflict policy
+       ├── logical transactions
+       └── Query execution contract
+             ↓
+ InMemoryKnowledgeStore (reference adapter)
+             ↓
+ future database adapters
+```
+
+The Port never exposes database-specific concepts. Persisted objects retain their typed
+identity, provenance, relations, evidence, and first-class transformations. The in-memory
+adapter keeps deterministic identity order and evaluates RFC-009 queries without changing
+the query or stored entities. SQLite, PostgreSQL, graph stores, indexing, caching, and
+physical transaction optimization remain outside RFC-010.
