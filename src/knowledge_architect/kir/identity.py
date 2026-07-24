@@ -54,3 +54,8 @@ class EvidenceId(KIRIdentity):
 @dataclass(frozen=True, slots=True)
 class ProvenanceId(KIRIdentity):
     prefix: ClassVar[str] = "provenance"
+
+
+@dataclass(frozen=True, slots=True)
+class ExtensionId(KIRIdentity):
+    prefix: ClassVar[str] = "extension"

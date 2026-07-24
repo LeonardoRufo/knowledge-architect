@@ -1,8 +1,16 @@
 from .entity import Entity
 from .evidence import Evidence, EvidenceKind
+from .extension import (
+    ExtensionCapability,
+    ExtensionCapabilityKind,
+    ExtensionDefinition,
+    ExtensionDependency,
+    ExtensionRegistry,
+)
 from .identity import (
     EntityId,
     EvidenceId,
+    ExtensionId,
     KIRIdentity,
     KnowledgeUnitId,
     ProvenanceId,
@@ -19,6 +27,12 @@ __all__ = [
     "Evidence",
     "EvidenceId",
     "EvidenceKind",
+    "ExtensionCapability",
+    "ExtensionCapabilityKind",
+    "ExtensionDefinition",
+    "ExtensionDependency",
+    "ExtensionId",
+    "ExtensionRegistry",
     "KIRIdentity",
     "KnowledgeUnit",
     "KnowledgeUnitId",
