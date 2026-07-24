@@ -148,3 +148,22 @@ new KnowledgeUnits / Relations
 ```
 
 Merge and split shapes are validated, target identities must be new, and relation propagation is never implicit. A `TransformationResult` binds the transformation record to the exact immutable objects it created.
+
+## Formal KIR validation
+
+RFC-008 adds contextual validation for integrity rules that cannot be decided by immutable object constructors alone. Validators accumulate stable, machine-readable issues and never mutate KIR objects or registries.
+
+```text
+KIR object + ValidationContext
+              ↓
+      ValidationRegistry
+              ↓
+ one or more typed validators
+              ↓
+ deterministic ValidationResult
+    ├── errors
+    ├── warnings
+    └── informational issues
+```
+
+Strict and permissive modes alter only policy-sensitive findings such as missing optional provenance or relations requiring review. Broken references and immutable Core violations remain errors in every mode. Extensions may add validators in their own scope but cannot replace or weaken Core validation.
