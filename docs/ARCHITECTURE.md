@@ -113,3 +113,20 @@ future KIR event and projection adapters
 ```
 
 The KIR package is domain-only. It does not import connectors, SQLite adapters, application handlers, or projections. Existing Core objects cannot be mutated or semantically redefined by future extensions.
+
+## Formal KIR extensions
+
+RFC-006 adds a declarative extension boundary over the immutable KIR Core. Extensions declare versioned capabilities in reverse-domain namespaces and may depend explicitly on already registered extension versions.
+
+```text
+immutable KIR Core
+        ↑ preserved unchanged
+ExtensionDefinition
+        ├── owned namespace
+        ├── versioned capabilities
+        └── explicit dependencies
+                ↓
+        ExtensionRegistry
+```
+
+The registry validates manifests but does not import or execute extension code. Reserved Core namespaces cannot be claimed by extensions.
