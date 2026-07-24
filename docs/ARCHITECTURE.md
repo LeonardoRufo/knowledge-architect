@@ -167,3 +167,27 @@ KIR object + ValidationContext
 ```
 
 Strict and permissive modes alter only policy-sensitive findings such as missing optional provenance or relations requiring review. Broken references and immutable Core violations remain errors in every mode. Extensions may add validators in their own scope but cannot replace or weaken Core validation.
+
+## Storage-independent KIR queries
+
+RFC-009 adds a declarative query boundary without introducing persistence or execution
+strategy into the KIR Core.
+
+```text
+immutable Query
+    ├── origin identities
+    ├── predicate composition
+    ├── traversal intent
+    ├── ordering
+    ├── projection
+    └── pagination
+              ↓
+        QueryEngine contract
+              ↓
+ deterministic QueryResult
+```
+
+Queries are immutable and canonically serializable. They describe intent only. Concrete
+memory, SQL, graph, RDF, or future engines implement `QueryEngine` outside the Core and
+must preserve the semantics of every query component. Traversal algorithms, physical
+plans, indexing, caching, and persistence are intentionally outside RFC-009.
