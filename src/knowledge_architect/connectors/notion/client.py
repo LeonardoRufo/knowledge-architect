@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from datetime import datetime
-from typing import Any
+from typing import Any, Self
 
 import httpx
 
@@ -42,7 +42,7 @@ class NotionClient:
     def close(self) -> None:
         self._client.close()
 
-    def __enter__(self) -> "NotionClient":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *_: object) -> None:
@@ -105,7 +105,7 @@ class NotionClient:
             source_id=page_id,
             title=title,
             url=page.get("url"),
-            last_edited_time=datetime.fromisoformat(edited.replace("Z", "+00:00")) if edited else None,
+            last_edited_time=datetime.fromisoformat(edited) if edited else None,
             content_markdown=markdown,
             raw_metadata={"object": page.get("object"), "archived": page.get("archived", False)},
         )
