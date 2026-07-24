@@ -1,33 +1,29 @@
 from __future__ import annotations
 
-from collections.abc import Callable
-
 from knowledge_architect.application.commands import SyncSourceArtifactCommand
 from knowledge_architect.application.results import SyncSourceArtifactResult
-from knowledge_architect.connectors.notion import NotionConnector
-from knowledge_architect.event_store import SQLiteEventStore
+from knowledge_architect.ports import EventFactoryPort, EventStorePort, SourceProviderPort
 
 
 class SyncSourceArtifactHandler:
     """Orchestrate source acquisition, event creation, and persistence.
 
-    This first application-layer boundary intentionally preserves the v0.1
-    connector and event-store contracts. Future RFCs will replace the concrete
-    dependencies with ports without changing the CLI contract introduced here.
+    The application layer depends only on ports. Concrete infrastructure is
+    selected by an interface adapter, such as the CLI composition root.
     """
 
     def __init__(
         self,
-        connector: NotionConnector,
-        event_store: SQLiteEventStore,
-        event_factory: Callable | None = None,
+        source_provider: SourceProviderPort,
+        event_store: EventStorePort,
+        event_factory: EventFactoryPort,
     ) -> None:
-        self._connector = connector
+        self._source_provider = source_provider
         self._event_store = event_store
-        self._event_factory = event_factory or connector.to_event
+        self._event_factory = event_factory
 
     def handle(self, command: SyncSourceArtifactCommand) -> SyncSourceArtifactResult:
-        document = self._connector.fetch(command.source_id)
+        document = self._source_provider.fetch(command.source_id)
         event = self._event_factory(document)
         inserted = self._event_store.append([event])
         return SyncSourceArtifactResult(

@@ -5,7 +5,7 @@ from knowledge_architect.core import KnowledgeEvent, SourceDocument
 from knowledge_architect.event_store import SQLiteEventStore
 
 
-class StubConnector:
+class StubSourceProvider:
     def fetch(self, source_id: str) -> SourceDocument:
         return SourceDocument(
             source_system="stub",
@@ -14,21 +14,26 @@ class StubConnector:
             content_markdown="# Conteúdo",
         )
 
-    def to_event(self, document: SourceDocument) -> KnowledgeEvent:
-        return KnowledgeEvent(
-            event_id="event-1",
-            event_type="source_document_observed",
-            source_system=document.source_system,
-            source_id=document.source_id,
-            occurred_at=datetime(2026, 1, 1, tzinfo=UTC),
-            payload={"title": document.title, "content_markdown": document.content_markdown},
-        )
+
+def stub_event_factory(document: SourceDocument) -> KnowledgeEvent:
+    return KnowledgeEvent(
+        event_id="event-1",
+        event_type="source_document_observed",
+        source_system=document.source_system,
+        source_id=document.source_id,
+        occurred_at=datetime(2026, 1, 1, tzinfo=UTC),
+        payload={"title": document.title, "content_markdown": document.content_markdown},
+    )
 
 
-def test_handler_orchestrates_sync_without_cli(tmp_path) -> None:
+def test_handler_orchestrates_sync_through_ports(tmp_path) -> None:
     store = SQLiteEventStore(tmp_path / "events.sqlite3")
-    connector = StubConnector()
-    handler = SyncSourceArtifactHandler(connector=connector, event_store=store)
+    provider = StubSourceProvider()
+    handler = SyncSourceArtifactHandler(
+        source_provider=provider,
+        event_store=store,
+        event_factory=stub_event_factory,
+    )
 
     result = handler.handle(SyncSourceArtifactCommand(source_id="source-1"))
 

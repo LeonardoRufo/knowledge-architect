@@ -45,3 +45,19 @@ A versão atual exige apenas `Ler conteúdo` no Notion. Atualização, inserçã
 ## Decisões
 
 As decisões permanentes estão em [`docs/adr`](adr/). Propostas incrementais de implementação estão em [`docs/rfc`](rfc/).
+
+## Application ports (RFC-002)
+
+The synchronization use case now follows dependency inversion:
+
+```text
+CLI composition root
+        ↓
+SyncSourceArtifactHandler
+        ↓
+SourceProviderPort + EventFactoryPort + EventStorePort
+        ↓
+NotionConnector + SQLiteEventStore
+```
+
+Application handlers must not import concrete connectors or persistence adapters.
