@@ -7,6 +7,7 @@ import typer
 
 from knowledge_architect.application import SyncSourceArtifactCommand, SyncSourceArtifactHandler
 from knowledge_architect.connectors.notion import NotionClient, NotionConnector
+from knowledge_architect.core import SourceObservationEventFactory
 from knowledge_architect.event_store import SQLiteEventStore
 from knowledge_architect.materializer import materialize
 from knowledge_architect.settings import Settings
@@ -48,7 +49,7 @@ def notion_sync_page(page_id: str) -> None:
         handler = SyncSourceArtifactHandler(
             source_provider=connector,
             event_store=store,
-            event_factory=connector.to_event,
+            event_factory=SourceObservationEventFactory(),
         )
         result = handler.handle(SyncSourceArtifactCommand(source_id=page_id))
     typer.echo(

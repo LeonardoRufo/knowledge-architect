@@ -61,3 +61,23 @@ NotionConnector + SQLiteEventStore
 ```
 
 Application handlers must not import concrete connectors or persistence adapters.
+
+## Observation identity
+
+Source synchronization separates occurrence identity from logical identity:
+
+```text
+SourceDocument
+    ↓
+SourceObservation
+    ├── observation_id (occurrence)
+    ├── content_fingerprint (normalized content)
+    └── idempotency_key (logical observation)
+    ↓
+KnowledgeEvent
+    ↓
+EventStore (deduplicate by idempotency_key)
+```
+
+Connectors acquire and normalize source data. The observation factory owns
+fingerprinting and event creation, while the event store enforces idempotency.
