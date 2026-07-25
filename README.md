@@ -1,88 +1,182 @@
 # Knowledge Architect
 
-Primeiro repositório modular do **Knowledge Architect Agent (KAA)**. Esta entrega contém um núcleo event-sourced, materialização determinística e um conector **somente leitura** para o Notion.
+> A Python framework for building durable, interoperable, and semantically rich knowledge systems.
 
-## O que já funciona
+Knowledge Architect is an open-source framework for representing, transforming, and synchronizing knowledge while preserving semantic identity, provenance, and structural consistency.
 
-- autenticação por token de conexão interna do Notion;
-- descoberta das páginas compartilhadas com a conexão;
-- leitura de propriedades e blocos de uma página;
-- conversão básica dos blocos para Markdown;
-- emissão de eventos imutáveis;
-- armazenamento local em SQLite;
-- materialização e exportação do estado atual;
-- testes automatizados sem depender de uma conta real.
+At its core is the **Knowledge Intermediate Representation (KIR)**, a canonical model designed to remain independent of storage technologies, user interfaces, and external platforms. Integrations such as Notion are treated as **projections** of the KIR rather than the source of truth.
 
-## Instalação
+---
 
-### macOS / Linux
+## Why Knowledge Architect?
 
-```bash
-cd knowledge-architect
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -e ".[dev]"
-cp .env.example .env
+Most knowledge tools are tightly coupled to a specific platform or storage model.
+
+Knowledge Architect separates the **domain model** from its representations, allowing the same knowledge to be:
+
+- stored locally;
+- synchronized with external platforms;
+- transformed into different representations;
+- versioned and evolved without losing semantic identity.
+
+The framework is designed around explicit semantic transformations instead of ad hoc data conversions.
+
+---
+
+## Core Principles
+
+- **Canonical Representation**
+  - The KIR is always the source of truth.
+
+- **Immutable Transformations**
+  - Structural changes produce new semantic identities while preserving provenance.
+
+- **Explicit Semantics**
+  - Every transformation records how knowledge changed.
+
+- **Platform Independence**
+  - External systems are projections of the canonical model.
+
+- **Extensible Architecture**
+  - New repositories and integrations can be added without changing the core domain.
+
+---
+
+## Architecture
+
+```
+                Knowledge Architect
+                        │
+                        ▼
+             Knowledge Intermediate
+                Representation (KIR)
+                        │
+        ┌───────────────┴───────────────┐
+        ▼                               ▼
+ Local Repository              Notion Repository
+                                        │
+                                        ▼
+                                   Notion API
 ```
 
-### Windows PowerShell
+The core domain never depends on external platforms.
 
-```powershell
-cd knowledge-architect
-py -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
-Copy-Item .env.example .env
+Repositories are responsible for persistence and synchronization while preserving the semantics defined by the KIR.
+
+---
+
+## Features
+
+- Canonical Knowledge Intermediate Representation (KIR)
+- Semantic knowledge model
+- Immutable transformation model
+- Provenance tracking
+- Repository abstraction
+- Synchronization framework
+- Notion integration
+- Comprehensive unit tests
+- Integration tests
+- GitHub Actions CI
+
+---
+
+## Project Structure
+
 ```
-
-Abra `.env` e substitua apenas o valor de `NOTION_TOKEN`. Não compartilhe nem faça commit desse arquivo.
-
-## Compartilhar uma página com a conexão
-
-No Notion, abra a página desejada e use **••• → Conexões → Knowledge Architect**. A API só consegue descobrir conteúdo explicitamente compartilhado com a conexão.
-
-## Primeiro teste
-
-```bash
-kaa notion status
-kaa notion list
-```
-
-Copie o ID de uma página exibida e execute:
-
-```bash
-kaa notion sync-page ID_DA_PAGINA
-kaa status
-kaa export data/architecture.json
-```
-
-## Estrutura
-
-```text
 knowledge-architect/
-├── src/knowledge_architect/
-│   ├── application/
-│   ├── core/
-│   ├── connectors/notion/
-│   ├── event_store/
-│   ├── materializer/
-│   └── cli.py
-├── tests/
 ├── docs/
-│   ├── adr/
-│   ├── rfc/
-│   └── specification/
-├── data/
-├── .env.example
+├── scripts/
+├── src/
+│   └── knowledge_architect/
+├── tests/
 └── pyproject.toml
 ```
 
-## Limites desta versão
+---
 
-- sincroniza uma página por comando;
-- converte apenas os blocos textuais mais comuns;
-- ainda não extrai conceitos, relações ou Knowledge Units;
-- não escreve nada no Notion;
-- não executa LLM nem decisões autônomas.
+## Installation
 
-O próximo marco será sincronização incremental de várias páginas, seguida pela camada de extração semântica revisável.
+```bash
+git clone https://github.com/LeonardoRufo/knowledge-architect.git
+
+cd knowledge-architect
+
+python -m venv .venv
+
+source .venv/bin/activate
+
+pip install -e .
+```
+
+---
+
+## Running Tests
+
+Unit tests:
+
+```bash
+pytest --ignore=tests/integration
+```
+
+Integration tests:
+
+```bash
+pytest tests/integration/notion -m notion
+```
+
+---
+
+## Notion Integration
+
+Knowledge Architect includes an optional integration with Notion.
+
+The integration synchronizes Knowledge Units while keeping the KIR as the canonical representation.
+
+The integration is organized into independent components:
+
+- Client
+- Mapper
+- Repository
+- Synchronizer
+
+See:
+
+```
+docs/integrations/notion.md
+```
+
+---
+
+## Roadmap
+
+### Completed
+
+- KIR Core
+- Semantic model
+- Transformation model
+- Repository abstraction
+- Notion integration
+- Unit tests
+- Integration tests
+- Continuous Integration
+
+### Planned
+
+- Additional repository implementations
+- Advanced synchronization policies
+- Visualization tools
+- Knowledge graph exploration
+
+---
+
+## Contributing
+
+Contributions are welcome.
+
+Please open an issue before proposing large architectural changes so they can be discussed within the project's design principles.
+
+---
+
+## License
+
+MIT License
