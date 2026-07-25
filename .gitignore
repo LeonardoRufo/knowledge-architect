@@ -1,16 +1,25 @@
+# Virtual environment
 .venv/
+
+# Python
 __pycache__/
 *.py[cod]
+*.egg-info/
 .pytest_cache/
 .ruff_cache/
 .coverage
 htmlcov/
+
+# Local secrets
 .env
+.env.*
+!.env.example
+
+# Local data
 *.sqlite3
 data/*.json
 data/*.jsonl
 !data/.gitkeep
 
-*.egg-info/
-
+# macOS
 .DS_Store
