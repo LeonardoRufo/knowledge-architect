@@ -255,3 +255,15 @@ active revisions and remain derived, rebuildable structures.
 Goals use storage-independent Queries as success criteria and may be evaluated
 against current versioned state or a specific snapshot. Goals describe what is
 desired; they contain no planning, scheduling, tools or execution behavior.
+
+## Planning Model (RFC-014)
+
+`knowledge_architect.kir.plan` defines immutable strategies independently of execution.
+Each `Plan` explicitly targets one or more Goals and contains a `PlanGraph` of first-class
+`PlanStep` objects. Dependencies form a validated DAG; preconditions, postconditions, and
+completion criteria may use RFC-009 Queries without executing them.
+
+Subplans are explicit references and repository-wide validation rejects recursive cycles.
+`InMemoryPlanRepository` preserves linear immutable plan revisions using RFC-012
+`RevisionId` values and optimistic concurrency. Runtime state, scheduling, tools, retries,
+and monitoring remain outside the KIR Planning Model.
