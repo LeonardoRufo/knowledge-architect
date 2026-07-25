@@ -49,4 +49,4 @@ jobs:
         run: ruff check src tests
 
       - name: Run unit tests
-        run: pytest -m "not integration" --cov=knowledge_architect --cov-report=term-missing
+        run: pytest --ignore=tests/integration -m "not integration" --cov=knowledge_architect --cov-report=term-missing
