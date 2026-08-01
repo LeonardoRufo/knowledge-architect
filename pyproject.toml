@@ -34,6 +34,10 @@ where = ["src"]
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
+markers = [
+    "integration: testes que acessam serviços externos",
+    "notion: testes que acessam a API do Notion",
+]
 
 [tool.ruff]
 line-length = 100

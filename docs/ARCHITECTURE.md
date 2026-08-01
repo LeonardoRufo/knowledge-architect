@@ -267,3 +267,7 @@ Subplans are explicit references and repository-wide validation rejects recursiv
 `InMemoryPlanRepository` preserves linear immutable plan revisions using RFC-012
 `RevisionId` values and optimistic concurrency. Runtime state, scheduling, tools, retries,
 and monitoring remain outside the KIR Planning Model.
+
+## Agent Runtime (RFC-015)
+
+`knowledge_architect.runtime` is intentionally outside `knowledge_architect.kir`. It interprets immutable Plan revisions and owns mutable execution concerns through append-only events. `PlanExecution` and `StepExecution` are projections rebuilt from `ExecutionHistory`; they are not embedded in declarative Plans. Query evaluation is delegated to `QueryEngine`, while concrete step behavior is injected and remains independent from future tool execution.
